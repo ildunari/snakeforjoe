@@ -12,19 +12,59 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      position: relative; /* Added */
     }
     canvas {
       border: 1px solid white;
+    }
+    /* Added */
+    .arrow {
+      position: absolute;
+      width: 80px;
+      height: 80px;
+      background-color: rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      color: white;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    .arrow:hover {
+      background-color: rgba(255, 255, 255, 0.5);
+    }
+    #arrow-up {
+      top: 20px;
+      left: calc(50% - 40px);
+    }
+    #arrow-down {
+      bottom: 20px;
+      left: calc(50% - 40px);
+    }
+    #arrow-left {
+      top: calc(50% - 40px);
+      left: 20px;
+    }
+    #arrow-right {
+      top: calc(50% - 40px);
+      right: 20px;
     }
   </style>
 </head>
 <body>
   <canvas width="400" height="400" id="game"></canvas>
+  <div id="arrow-up" class="arrow">↑</div>
+  <div id="arrow-down" class="arrow">↓</div>
+  <div id="arrow-left" class="arrow">←</div>
+  <div id="arrow-right" class="arrow">→</div>
   <script>
     var canvas = document.getElementById('game');
     var context = canvas.getContext('2d');
     var grid = 16;
     var count = 0;
+    var speed = 6
     var snake = {
       x: 160,
       y: 160,
@@ -42,7 +82,7 @@
     }
     function loop() {
       requestAnimationFrame(loop);
-      if (++count < 4) {
+      if (++count < speed) { // Increase the delay before moving the snake based on the "speed" variable
         return;
       }
       count = 0;
@@ -64,6 +104,9 @@
       snake.cells.unshift({x: snake.x, y: snake.y});
       if (snake.cells.length > snake.maxCells) {
         snake.cells.pop();
+        speed -= 0.5; // Decrease the delay between snake movements
+        if (speed < 1) {
+          speed = 1; // Set a minimum speed to avoid excessively fast movements
       }
       context.fillStyle = 'red';
       context.fillRect(apple.x, apple.y, grid-1, grid-1);
