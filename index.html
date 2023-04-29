@@ -77,57 +77,142 @@
       y: 320
     };
 
-    // Rest of the code...
-
-    // Touch event handling
-    var touchStartX = 0;
-    var touchStartY = 0;
-    var touchEndX = 0;
-    var touchEndY = 0;
-
-    function handleTouchStart(e) {
-      touchStartX = e.touches[0].clientX;
-      touchStartY = e.touches[0].clientY;
+    function getRandomInt(min, max) {
+      return Math.floor(Math.random() * (max - min)) + min;
     }
 
-    function handleTouchMove(e) {
-      e.preventDefault();
-      touchEndX = e.touches[0].clientX;
-      touchEndY = e.touches[0].clientY;
+    function drawSnake() {
+      context.fillStyle = 'green';
+      snake.cells.forEach(function(cell, index) {
+        context.fillRect(cell.x, cell.y, grid - 1, grid - 1);
+        context.strokeStyle = 'darkgreen';
+        context.strokeRect(cell.x, cell.y, grid, grid);
+      });
     }
 
-    function handleTouchEnd() {
-      var dx = touchEndX - touchStartX;
-      var dy = touchEndY - touchStartY;
-      var absDX = Math.abs(dx);
-      var absDY = Math.abs(dy);
+    function drawApple() {
+      context.fillStyle = 'red';
+      context.fillRect(apple.x, apple.y, grid - 1, grid - 1);
+    }
 
-      if (absDX > absDY && absDX > 30) {
-        if (dx > 0 && snake.dx === 0) {
-          snake.dx = grid;
-          snake.dy = 0;
-        } else if (dx <        0 && snake.dx === 0) {
-          snake.dx = -grid;
-          snake.dy = 0;
-        }
-      } else if (absDY > absDX && absDY > 30) {
-        if (dy > 0 && snake.dy === 0) {
-          snake.dy = grid;
-          snake.dx = 0;
-        } else if (dy < 0 && snake.dy === 0) {
-          snake.dy = -grid;
-          snake.dx = 0;
-        }
+    function update() {
+      count++;
+
+      if (count < speed) {
+        requestAnimationFrame(update);
+        return;
+      }
+
+      count = 0;
+      context.clearRect(0, 0, canvas.width, canvas.height);
+
+      snake.x += snake.dx;
+      snake.y += snake.dy;
+
+      if (snake.x < 0) {
+        snake.x = canvas.width - grid;
+      } else if (snake.x >= canvas.width) {
+        snake.x = 0;
+      }
+        if (snake.y < 0) {
+    snake.y = canvas.height - grid;
+  } else if (snake.y >= canvas.height) {
+    snake.y = 0;
+  }
+
+  snake.cells.unshift({x: snake.x, y: snake.y});
+
+  while (snake.cells.length > snake.maxCells) {
+    snake.cells.pop();
+  }
+
+  if (snake.x === apple.x && snake.y === apple.y) {
+    snake.maxCells++;
+    apple.x = getRandomInt(0, canvas.width / grid) * grid;
+    apple.y = getRandomInt(0, canvas.height / grid) * grid;
+  }
+
+  snake.cells.forEach(function(cell, index) {
+    for (var i = index + 1; i < snake.cells.length; i++) {
+      if (cell.x === snake.cells[i].x && cell.y === snake.cells[i].y) {
+        snake.x = 160;
+        snake.y = 160;
+        snake.cells = [];
+        snake.maxCells = 4;
+        apple.x = getRandomInt(0, canvas.width / grid) * grid;
+        apple.y = getRandomInt(0, canvas.height / grid) * grid;
+        break;
       }
     }
+  });
 
-    // Add touch event listeners
-    document.addEventListener('touchstart', handleTouchStart);
-    document.addEventListener('touchmove', handleTouchMove);
-    document.addEventListener('touchend', handleTouchEnd);
+  drawSnake();
+  drawApple();
+  requestAnimationFrame(update);
+}
 
-    // Rest of the code...
-  </script>
+var touchStartX = 0;
+var touchStartY = 0;
+var touchEndX = 0;
+var touchEndY = 0;
+
+function handleTouchStart(e) {
+  touchStartX = e.touches[0].clientX;
+  touchStartY = e.touches[0].clientY;
+}
+
+function handleTouchMove(e) {
+  e.preventDefault();
+  touchEndX = e.touches[0].clientX;
+  touchEndY = e.touches[0].clientY;
+}
+
+function handleTouchEnd() {
+  var dx = touchEndX - touchStartX;
+  var dy = touchEndY - touchStartY;
+  var absDX = Math.abs(dx);
+  var absDY = Math.abs(dy);
+
+  if (absDX > absDY && absDX > 30) {
+    if (dx > 0 && snake.dx === 0) {
+      snake.dx = grid;
+      snake.dy = 0;
+    } else if (dx < 0 && snake.dx === 0) {
+      snake.dx = -grid;
+      snake.dy = 0;
+    }
+  } else if (absDY > absDX && absDY > 30) {
+    if (dy > 0 && snake.dy === 0) {
+      snake.dy = grid;
+      snake.dx = 0;
+    } else if (dy < 0 && snake.dy === 0) {
+      snake.dy = -grid;
+      snake.dx = 0;
+    }
+  }
+}
+
+document.addEventListener('touchstart', handleTouchStart);
+document.addEventListener('touchmove', handleTouchMove);
+document.addEventListener('touchend', handleTouchEnd);
+
+document.addEventListener('keydown', function(e) {
+  if (e.which === 37 && snake.dx === 0) {
+    snake.dx = -grid;
+    snake.dy = 0;
+  } else if (e.which === 38 && snake.dy === 0) {
+    snake.dy = -grid;
+    snake.dx = 0;
+  } else if (e.which === 39 && snake.dx === 0) {
+    snake.dx = grid;
+    snake.dy = 0;
+  } else if (e.which === 40 && snake.dy === 0) {
+    snake.dy = grid;
+    snake.dx = 0;
+  }
+});
+
+update();
+</script>
 </body>
 </html>
-
