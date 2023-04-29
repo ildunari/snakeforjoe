@@ -81,57 +81,63 @@
       return Math.floor(Math.random() * (max - min)) + min;
     }
     function loop() {
-      requestAnimationFrame(loop);
-      if (++count < speed) { // Increase the delay before moving the snake based on the "speed" variable
-        return;
+  requestAnimationFrame(loop);
+  if (++count < speed) {
+    return;
+  }
+  count = 0;
+
+  context.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas
+
+  snake.x += snake.dx;
+  snake.y += snake.dy;
+  if (snake.x < 0) {
+    snake.x = canvas.width - grid;
+  } else if (snake.x >= canvas.width) {
+    snake.x = 0;
+  }
+  if (snake.y < 0) {
+    snake.y = canvas.height - grid;
+  } else if (snake.y >= canvas.height) {
+    snake.y = 0;
+  }
+  snake.cells.unshift({ x: snake.x, y: snake.y });
+  if (snake.cells.length > snake.maxCells) {
+    snake.cells.pop();
+  }
+
+  // Check if the snake has collided with the apple
+  if (snake.cells[0].x === apple.x && snake.cells[0].y === apple.y) {
+    snake.maxCells++;
+    apple.x = getRandomInt(0, 25) * grid;
+    apple.y = getRandomInt(0, 25) * grid;
+  }
+
+  // Render the snake
+  context.fillStyle = 'green';
+  snake.cells.forEach(function (cell, index) {
+    context.fillRect(cell.x, cell.y, grid - 1, grid - 1);
+
+    // Check for collisions with the snake's own body
+    for (var i = index + 1; i < snake.cells.length; i++) {
+      if (cell.x === snake.cells[i].x && cell.y === snake.cells[i].y) {
+        // Reset the game when collision occurs
+        snake.x = 160;
+        snake.y = 160;
+        snake.cells = [];
+        snake.maxCells = 4;
+        snake.dx = grid;
+        snake.dy = 0;
+        apple.x = getRandomInt(0, 25) * grid;
+        apple.y = getRandomInt(0, 25) * grid;
       }
-      count = 0;
-      context.clearRect(0,0,canvas.width,canvas.height);
-      snake.x += snake.dx;
-      snake.y += snake.dy;
-      if (snake.x < 0) {
-        snake.x = canvas.width - grid;
-      }
-      else if (snake.x >= canvas.width) {
-        snake.x = 0;
-      }
-      if (snake.y < 0) {
-        snake.y = canvas.height - grid;
-      }
-      else if (snake.y >= canvas.height) {
-        snake.y = 0;
-      }
-      snake.cells.unshift({x: snake.x, y: snake.y});
-      if (snake.cells.length > snake.maxCells) {
-        snake.cells.pop();
-        speed -= 0.5; // Decrease the delay between snake movements
-        if (speed < 1) {
-          speed = 1; // Set a minimum speed to avoid excessively fast movements
-      }
-      context.fillStyle = 'red';
-      context.fillRect(apple.x, apple.y, grid-1, grid-1);
-      context.fillStyle = 'green';
-      snake.cells.forEach(function(cell, index) {
-        context.fillRect(cell.x, cell.y, grid-1, grid-1);
-        if (cell.x === apple.x && cell.y === apple.y) {
-          snake.maxCells++;
-          apple.x = getRandomInt(0, 25) * grid;
-          apple.y = getRandomInt(0, 25) * grid;
-        }
-        for (var i = index + 1; i < snake.cells.length; i++) {
-          if (cell.x === snake.cells[i].x && cell.y === snake.cells[i].y) {
-            snake.x = 160;
-            snake.y = 160;
-            snake.cells = [];
-            snake.maxCells = 4;
-            snake.dx = grid;
-            snake.dy = 0;
-            apple.x = getRandomInt(0, 25) * grid;
-            apple.y = getRandomInt(0, 25) * grid;
-          }
-        }
-      });
     }
+  });
+
+  // Render the apple
+  context.fillStyle = 'red';
+  context.fillRect(apple.x, apple.y, grid - 1, grid - 1);
+}
 
     // listen to keyboard events to move the snake
     document.addEventListener('keydown', function(e) {
